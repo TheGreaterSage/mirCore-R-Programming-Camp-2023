@@ -1,0 +1,390 @@
+---
+title: "Graphs_Blank"
+output: html_document
+date: 'July 2023'
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Today we will learn about how to make graphs to visually represent our
+data in a meaningful way
+
+# miRcore R camp day 4
+
+## graphs
+
+random data
+
+Lets make some random data to play with using the sample function. ex:We
+can choose 2 numbers out of 1,2,3,23 and 5 randomly without repeats.
+
+```{r}
+sample(c(1, 2, 3, 23, 5), 2, replace = F)
+```
+
+What if we want repeats? Then we need to use sampling with replacement.
+This will choose 100 numbers randomly between 1 and 50, with repeats.
+
+```{r}
+sample(1:50, 100, replace = T)
+```
+
+What if we wanted to choose only even numbers? ex: We can use sample()
+and seq() to choose 100 numbers out of the even numbers between 2 and 50
+randomly with repeats.
+
+```{r}
+sample(c(from=2, to=50, by=2), 100, replace = T)
+```
+
+bargraph
+
+Lets see if we can make a barplot of some data. The function we use is
+barplot(x) where x is a matrix or a vector.
+
+Our example below shows a barplot of 100 numbers chosen randomly between
+1 and 50 with replacement.
+
+```{r}
+barplot(sample(1:50,100,replace=T))
+```
+
+Lets add some arguments to add titles and axis labels.
+
+```{r}
+barplot(sample(1:50,100,replace=T), main = "Graph Title", xlab = "x-label", ylab = "y-label")
+```
+
+## add more argument
+
+Lets try each argument to see the changes:
+
+```{r}
+points = sample(c(1,2,3,23,5), 4, replace = T)
+barplot(points, main="Hogwards house points", xlab="Houses", ylab="Points", names.arg = c("Slytherine", "Gryffindor", "Ravenclaw", "Hufflepuff"), col=c("green", "red", "blue", "yellow"), legend.text=c("Slyth", "Gryff", "Raven", "Huffle"))
+```
+
+Other arguments you can use: legend.text=x, where x is a vector of
+strings\* that are put in a legend col=x, where x is a vector of colors
+for the bars and the legend border=x, where x is a vector of colors for
+the borders of the bars width=x, where x is a vector that changes the
+widths of the bars space=x, where x is a ratio of each bar to be a space
+to the next bar names.arg=x, where x is a vector of names for the bars
+horiz=True/False, setting the bar graph to a horizontal or vertical one
+density=25 changes the shading of the bars angle=x, where x is a number
+of degrees for the shading (works with density argument)
+ylim=c(ymin,ymax), where ymin and ymax are ranges for y-axis Some
+arguments, like names.arg, need to have a number of elements equal to
+the number of bars. Others, like col and border, will repeat if there're
+less elements than bars.
+
+multiple graphs: Sometimes we will want to arrange multiple graphs. This
+can be done using the par() function. The example below shows how we can
+arrange 2 figures in 2 rows and 1 column.
+
+```{r}
+par(mfrow = (c(2,1)))
+barplot(sample(1:25, 4, replace=T), main = "game 1", col = c("green", 'red', "blue"))
+barplot(sample(1:25, 4, replace=T), main = "game 2", col = c("gold", 'magenta', "black"))
+```
+
+To return to one figure in one window we use par() again.
+
+```{r}
+par(mfrow(c(1,1)))
+```
+
+Some really nice color selections can be found here:
+<http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf>
+
+Breakout Room! -Make 2 figures arranged in 1 rows and 2 column -Each bar
+graph figure of four teams' random scores between 1 and 30 -Two games of
+titles "Game 1" and "Game 2" -Add ylim argument to make the same y-axis
+for both figures -Change colors for each bar using the Rcolor.pdf
+-par(mfrow=c(1,1))
+
+```{r}
+par(mfrow=c(1,2))
+barplot(sample(1:30, 4, replace=T), main = "Game 1", xlab = "Teams", ylab = "Scores", names.arg = c("T1", "T2", "T3", "T4"), col = c("darkgreen", 'firebrick', "deepskyblue", "gold"), ylim = c(0,30))
+barplot(sample(1:30, 4, replace=T), main = "Game 2", xlab = "Teams", ylab = "Scores", names.arg = c("T1", "T2", "T3", "T4"), col = c("darkgreen", 'firebrick', "deepskyblue", "gold"), ylim = c(0,30))
+
+
+```
+
+```{r}
+
+```
+
+Box Plots:(slide 16) In descriptive statistics, a boxplot is a
+convenient way of graphically depicting groups of numerical data through
+their quartiles. They may also have lines extending vertically from the
+boxes (whiskers) to indicate the variability outside the upper and lower
+quartiles. "Box and Whisker plot" outliers may also be plotted as
+individual points
+
+Quartiles are defined by the following: Minimum Second quartile: the
+value below which the lower 25% of data is contained Median: The middle
+number in a range of numbers Third quartile: The value above which the
+upper 25% of data is contained Maximum
+
+##box plot
+
+Lets make a boxplot using the boxplot() function! Use a sample of 1000
+points betweeen 1 and 100 with replacement
+
+```{r}
+boxplot(sample(1:100, 1000, replace = T))
+```
+
+real data boxplot
+
+Now lets look at a boxplot using real data- First make sure we have
+properly read in small_data.txt
+
+```{r}
+smalldata = read.table("small_data.txt", header=T, row.names=1, stringsAsFactors=F)
+```
+
+Lets make a boxplot for the Tumor and control samples 1 through 3. what
+do you notice? How might we make a more visually informative plot?
+
+```{r}
+boxplot(smalldata[, c(1:3, 11:13)], main = "Boxplot of  3 sample")
+```
+
+why log? For high-throughput sequencing data, there is often a lot of
+data with very low expression values. Because the data is so skewed, it
+is hard to get an accurate view of the distribution of the data.
+
+Log transformation can be used to make highly skewed data less skewed:
+
+```{r}
+log.smalldata = log2(smalldata + 1)
+boxplot(log.smalldata[,c(1:3, 11:13)], main = "Boxplot of 3 Tumors, 3 Controls", xlab = "Sample", ylab = "Expression")
+```
+
+Why do we add a +1 to the data when making a log plot?
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+Grep reminder for task 1: we need to make the following vectors for task
+1: vaa should be all the samples for a miR_a vta should be the Tumor
+samples for a miR_a vca should be the control samples for a miR_a
+
+Let's select row names with specific words such as "miR_a"
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+Task 1: -Make a matrix smalldataM from smalldata -Make a bar graph of
+the miR_a values of all samples (vaa). -Make a bar graph of the miR_a
+values of all tumor samples (vta). -Make a bar graph of the miR_a values
+of all control samples (vca). -Add title and x-axis and y-axis labels.
+-Put graphs from 3 and 4 having the same y-axis range in one window.
+
+answers: 1: Make a matrix smalldataM from smalldata
+
+```{r}
+
+```
+
+make a bar graph of the miR_a values of all samples (vaa)
+
+```{r}
+
+```
+
+3:make a bar graph of the miR_a values of all tumor samples
+
+```{r}
+
+```
+
+4:Make a bar graph of all the control samples (vca)
+
+```{r}
+
+```
+
+We can also do this using grep:
+
+```{r}
+
+
+
+```
+
+Put graphs from 3 and 4 with the same y-axis range in one window
+
+```{r}
+
+```
+
+## scatter plot
+
+A scatter graph plots paired values. Here we'll use the function
+plot(x,y) where x and y are vectors.
+
+```{r}
+
+plot(1:5, 10:14)
+```
+
+```{r}
+plot(sample(1:100,50,replace=F), sample(30:400,50,replace=T))
+```
+
+We can set the x and y limits of the plots using: xlim() and ylim()
+
+```{r}
+plot(sample(1:100,50,replace=F), sample(30:400,50,replace=T), xlim = (c(0,400)), ylim = (c(0,50)))
+```
+
+You can find a variety of other graphic parameters such as line width
+and line type at this resource:
+<http://www.statmethods.net/advgraphs/parameters.html> lwd: line width
+lty: line type
+
+Task 2: Breakout Rooms!
+
+Make a scatter plot of miR_h values between each patient's tumor and
+control samples (tumor values on x-axis and control values on y-axis).
+as.matrix(smalldata)
+as.vector(), as.numeric()
+\*If you don't want scientific notation, give a penalty to it.
+options(scipen=5) \# positive number prefers fixed value, negative
+number prefers scientific notation.
+
+answer:
+
+```{r}
+
+
+```
+
+We can use scatter plots to compare the expression values for different
+miRs. Lets look at miR_a plotted against miR_t
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+Quick break: 15 minutes
+
+## correlation
+
+See slides.
+
+Correlation is a mutual relationship between two or more things. In
+statistics, you can think of correlation as a measure of how strongly
+two or more things are related. Two variables with very high
+correllation will behave very similarly moving together. Variables with
+correlation close to zero will not move together.
+
+Two variables are said to be positively correlated if an increase in one
+is associated with an increase in the other Two variables are said to be
+negatively correlated if an increase in one is associated with a
+decrease in the other
+
+Shoe size and length of foot are very highly positively correlated: an
+increase in foot length will very strongly be associated with a larger
+shoe size
+
+SAT score and GPA are somewhat positively correlated: People with higher
+GPA tend to score higher on the SAT, but not always
+
+Shoe size and SAT score are uncorrelated (correlation close to zero):
+Think, do people with larger feet tend to do better/worse on the SAT?No,
+they tend to perform the same as people with small feet
+
+Shoe size and length of foot are very highly positively correlated: an
+increase in foot length will very strongly be associated with a larger
+shoe size
+
+SAT score and GPA are somewhat positively correlated: People with higher
+GPA tend to score higher on the SAT, but not always
+
+Shoe size and SAT score are uncorrelated (correlation close to zero):
+Think, do people with larger feet tend to do better/worse on the SAT?No,
+they tend to perform the same as people with small feet
+
+cor(x,y) calculates the correlation between the two vectors x and y
+Values close to 1 or -1 imply strong correlation Values close to 0
+indicate little to no correlation
+
+```{r}
+x<-c(5.1, 4.9, 4.7, 4.6, 5.0, 5.4)
+y<-c(3.5, 3.0, 3.2, 3.1, 3.6, 3.9)
+plot(x,y, xlab="X", ylab="Y", main="Correlation between X and Y")
+cor(x,y)
+
+```
+
+Correlation does not imply causation!!
+
+Example from wikipedia:Ice cream sales and the rate of drowning are
+positively correlated, but clearly ice cream consumption does not cause
+drowning.
+
+The aforementioned example fails to recognize the importance of time and
+temperature in relationship to ice cream sales. Ice cream is sold during
+the hot summer months at a much greater rate than during colder times,
+and it is during these hot summer months that people are more likely to
+engage in activities involving water, such as swimming. The increased
+drowning deaths are simply caused by more exposure to water-based
+activities, not ice cream.  These two variables are correlated, but do
+not cause each other
+
+### Task using small_data.txt
+
+Make vectors for each item
+
+Make a scatter plot between miR_a and miR_c for all samples. Make a
+scatter plot between miR_a and miR_k for all samples. What is the
+correlated value between miR_a and miR_c? What is the correlated value
+between miR_a and miR_k?
+
+Answers:
+
+```{r}
+mira = as.numeric(smalldata["miR_a",])
+mirc = as.numeric(smalldata["miR_c",])
+mirk = as.numeric(smalldata["miR_k",])
+plot(mira, mirc)
+plot(mira, mirk)
+cor(mira, mirc)
+cor(mira, mirk)
+
+```
+
+You downloaded your group data from Data folder Read
+full_BRCA_miR_data.txt as fullData. Get miR data distribution for each
+sample (hint: use boxplot function after log transform the data). Get
+miR data distribution of first 15 samples. Are the data comparable
+across samples?
+
+Full Data:
+
+```{r}
+
+```

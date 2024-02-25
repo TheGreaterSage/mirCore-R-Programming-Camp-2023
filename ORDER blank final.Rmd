@@ -1,0 +1,66 @@
+---
+title: "order blank"
+author: "Prasanna Padmanabham"
+date: "2023-07-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+### Basic Order example: 
+
+```{r}
+
+```
+
+
+### Harder Example: How can you sort smalldata based on p-value? 
+```{r}
+smalldata <- read.table("small_data.txt",header = T, row.names = 1, stringsAsFactors = F)
+smalldataM = as.matrix(smalldata)
+```
+
+let's see how smalldata looks like: 
+```{r}
+head(smalldataM)
+```
+
+find add a col of p-values
+```{r}
+pval = vector()
+for(i in 1:nrow(smalldataM))
+{
+  pval[i] = t.test(smalldataM[i,1:10], smalldataM[i, 11:20])$p.value
+}
+pval
+```
+
+```{r}
+smalldata_pval = cbind.data.frame(pval, smalldata)
+head(smalldata_pval)
+```
+
+We have: 
+smalldata with pvalues 
+and a vector of pvalues
+
+Now lets use the order function: 
+```{r}
+order(smalldata_pval$pval)
+smalldata_pval[order(smalldata_pval$pval), ]
+```
+
+
+
+Shortcut: 
+```{r}
+
+```
+
+
+
+

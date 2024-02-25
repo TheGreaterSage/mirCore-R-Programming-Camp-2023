@@ -1,0 +1,246 @@
+---
+title: "heatmap"
+output: html_document
+date: '2023-07-12'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Heatmap and Dendrogram: 
+
+A heat map is a graphical representation of data where the individual values contained in a matrix are represented as colors.
+
+Heat maps are typically used in molecular biology to represent the level of expression of many genes across a number of comparable samples (e.g. cells in different states, samples from different patients)
+
+A dendrogram is a tree diagram used to illustrate the arrangement of the clusters produced by hierarchical clustering. 
+
+Dendrograms are often used in computational biology to illustrate the clustering of genes or samples.
+
+
+# miRcore R camp day 3
+
+### read smalldata
+Make sure you have small_data.txt in your current directory.
+
+```{r}
+dir()
+smalldata = read.table("small_data.txt", header=T, row.names=1, stringsAsFactors=F)
+str(smalldata)
+```
+
+## Goal: Create a heatmap for the 10 Tumor and 10 Control samples in smalldata
+
+First we need to install an R package to make these pretty plots!
+
+```{r}
+install.packages("pheatmap")
+```
+
+After installing any package, we must load the library of that package once during your R session
+
+```{r}
+library("pheatmap")
+```
+
+#### pheatmap() can take a dataframe with numeric values as an input
+
+Let's check pheatmap description.
+
+### pheatmap
+## A function to draw clustered heatmaps.
+### Description
+A function to draw clustered heatmaps where one has better control over some graphical parameters such as cell size, etc.
+
+```{r}
+?pheatmap
+```
+
+### number without scientific notations
+Give a penalty if scientific notation is used
+
+```{r}
+options(scipen = 10)
+```
+
+
+### pheatmap without any options
+
+1. Use values as are with the default colors
+  (color palette shows keys to corresponding numbers)
+2. Keep all default options
+  a. columns are clustered by similarities
+  b. rows are clustered by similarities
+  
+#### Questions
+Are the tumor samples and control samples clustered separately?
+
+
+```{r}
+smalldata_heatmap = pheatmap(smalldata)
+```
+
+## Group time
+Everyone share your screen in turn and show your heatmap! 
+Do not worry if you are having trouble- your group leaders can help :)
+
+## Difficulties in biology data
+Only a few miRs are expressed abundantly compared to all other miRs whose functions are also important. How can we visualize 1) all miRs within similar range and 2) individual genes with the similar importance?
+
+### 1. Log transformation of the expression data
+Distributions of expression data become spreading out for better statistical applications.
+
+When using log transformation, add a small amount nonzero to keep all values positive.
+
+```{r}
+smalldata_heatmap <- log(smalldata +1)
+
+```
+
+#### Questions
+Are the tumor samples and control samples clustered separately?
+
+#### Abundance of genes differ
+Clustering all genes with their values as can be biased by abundant genes or scarce genes.
+
+
+### 2. pheatmap with scale
+Each row corresponding to each gene.
+We will investigate each gene's expressions across all samples, to identify differences between groups.
+
+So, we will use scale = 'row' to make the values be centered and scaled in the row direction
+
+
+```{r}
+pheatmap(smalldata_heatmap)
+```
+
+#### Questions
+Are the tumor samples and control samples clustered separately?
+
+
+## Make the heatmap look nice
+
+```{r}
+pheatmap(smalldata_heatmap,scale = 'row')
+```
+### Save the heatmap to a pdf file
+
+Here we will use clustering method uing correlation values.
+
+```{r}
+pheatmap(smalldata_heatmap, scale="row", clustering_distance_rows="correlation", clustering_distance_cols="correlation", cellwidth=25, cellheight=10, color=colorRampPalette(c("darkblue", "white", "red2"))(256), border_color=NA, main= "Heatmap of Sample Data", file="Heatmap_Sample_Data.pdf", width=10, height=10)
+
+dir(pattern=".pdf")
+```
+
+#### check the pdf file for the figure
+
+
+### If you don't want to cluster columns
+
+```{r}
+pheatmap(smalldata_heatmap, cluster_cols=F, scale="row", clustering_distance_rows="correlation", cellwidth=20, cellheight=10, color=colorRampPalette(c("darkblue", "white", "red2"))(256), border_color=NA, main= "Heatmap of Sample Data")
+```
+
+
+
+## The meaning of clustering
+
+Lets convert our data into a numeric matrix for calculations.
+
+
+### have a matrix form of smalldata
+```{r}
+smalldataM = as.matrix(smalldata)
+```
+
+
+# Group discussion:
+
+Which two miRs are clustered closely? 
+Is this related to the correlation values?
+
+Lets look at the correllation of miR_a and miR_c
+define vectors
+
+```{r}
+miR_a <- smalldataM["miR_a",]
+miR_c <- smalldataM["miR_c",]
+```
+
+## make a scatter plot
+
+```{r}
+plot(miR_a,miR_c)
+```
+
+
+## calculate correlation value between the two miRs
+
+What do you think the correlation will be here? 
+Lets check!
+
+### correlation between miR_a and miR_c
+
+```{r}
+cor(miR_a,miR_c)
+```
+
+## scatter plot and correlation value between miR_a and miR_k?
+
+```{r}
+miR_k <- smalldataM["miR_k",]
+plot(miR_a , miR_k)
+cor(miR_a , miR_k)
+```
+
+### select specific rows or columns
+
+Lets make a small smalldata to work with- Select rows with just miRa, miR_c and miR_k to understand relations among the three miRs.
+
+
+```{r}
+m_smalldata_heatmap=smalldata_heatmap[c("miR_a", "miR_c", "miR_k"),]
+```
+
+
+Now cluster both rows and columns of miR_a, miR_c, miR_k of all samples using pheatmap(). We already prepared numeric dataframe with three miRs.
+
+```{r}
+pheatmap(m_smalldata_heatmap, scale="row")
+```
+here is everything written so far I think:                           ##Add annotation
+Make a new dataframe with a Group category
+To have vectors of different data types(in a dataframe), 
+we need to add those vectors in columns in a dataframe
+to give sample id a disease category (annotation), the sample id should be in a row not a column 
+
+##make a vector using column nmaes of smalldata
+We will use only first character of the column names to give a same category controls, etc.
+
+---r
+Group=
+```{r}
+Group <- as.factor(substr(colnames(smalldata),1,1))
+Ann <- cbind.data.frame(Group)
+row.names(Ann) <- colnames(smalldata)
+Ann
+pheatmap(smalldata_heatmap, scale="row",cellwidth=16, cellheight=8, color=colorRampPalette(c("darkblue","white","red2"))(256), border_color = NA,
+        annotation_col = Ann,
+        main="Heatmap of Sample Data")
+```
+
+#### Question:
+Among three miRs, which ones were clustered closer together?
+Shorter height means closely related.
+
+
+
+more quiz if you want to solve: https://forms.gle/ydPhyfmYtxZBcice7
+
+No stress! Just to help us for future teachiing
+
+

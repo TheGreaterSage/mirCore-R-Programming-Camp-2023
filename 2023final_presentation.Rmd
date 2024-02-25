@@ -1,0 +1,209 @@
+---
+title: "miRcore R camp TCGA Group Task"
+author: "[Group Name Here]"
+date: "July 11, 2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+```
+
+# miRcore summer camp 2023
+© miRcore
+
+
+## Disease Information
+
+What is the significance ((background and problems) of the disease you are analyzing?
+
+
+
+## Reading in Data
+
+Read in the cancer miRNA expression text file that you downloaded from the Google Drive
+
+```{r}
+
+kirc = read.table("KIRC.txt", header = T, stringsAsFactors = F, row.names=1)
+```
+
+
+A. What are the dimensions of your text file?
+886 100
+```{r}
+
+dim(kirc)
+head(kirc)
+
+
+```
+
+B. How many Tumor and Control samples are in your dataset?
+
+```{r}
+length(grep("Control", colnames(kirc)))
+length(grep("Tumor", colnames(kirc)))
+
+```
+
+
+## Plotting
+
+A1. Make box plots for first 10 Tumor samples and first 10 Control samples using all data.
+
+```{r}
+boxplot(kirc[, c(1:10, 50:60)], main = "Boxplot of first 10 tumor and first 10 control")
+```
+
+A2. Make box plots for first 10 Tumor samples and first 10 Control samples using log2(data+1).
+
+```{r}
+log.kirc = log2(kirc+1)
+boxplot(log.kirc[, c(1:10, 50:60)], main = "Log2 boxplot of first 10 tumor and first 10 control", xlab = "Sample", ylab = "Expression")
+```
+
+
+B. Make a scatterplot for hsa-miR-200a-3p and hsa-miR-429 using all
+samples in your data file. Then compute the Pearson correlation.
+
+```{r}
+
+
+```
+
+Check that no rows have a sum of 0 
+Use rowSums() function 
+eg: rowSums(dataframe[column numbers vector], na.rm=TRUE)
+Remove needed rows 
+Use a for loop to calculate separately the mean of each row
+Calculate log2 fc
+log(mean(T)/mean(C),2)
+Make sure corresponding tumor and control columns are selected
+Save the results!
+Think about what data structure would be best
+```{r}
+nKIRC <- data.frame()
+control_cols <- grep("Control", colnames(kirc))
+tumor_cols <- grep("Tumor", colnames(kirc))
+
+for (i in 1:nrow(kirc)) {
+  if (sum(kirc[i, control_cols]) != 0 && sum(kirc[i, tumor_cols]) != 0) {
+    nKIRC <- rbind(nKIRC, kirc[i, ])
+  }
+}
+
+nKIRC
+```
+
+## T Tests
+
+
+A. For each miRNA: calculate mean, standard deviation, and the 2-tail student t-test p-value of Tumor and Control groups. Save all results in a table.
+
+```{r}
+kircmatrix = as.matrix(kirc)
+kircttest = data.frame()
+for(i in 1:nrow(kirc)) {
+  kircTumor = kircmatrix[i, tumor_cols]
+  kircControl = kircmatrix[i, control_cols]
+  kircTumorMean = mean(kircTumor)
+  kircTumorSD = sd(kircTumor)
+  kircControlMean = mean(kircControl)
+  kircControlSD = sd(kircControl)
+  pvalue = t.test(kircTumor, kircControl)$p.value
+  kircttest[i, "Tumor Mean"] = kircTumorMean
+  kircttest[i, "Control Mean"] = kircControlMean
+  kircttest[i, "Tumor SD"] = kircTumorSD
+  kircttest[i, "Control SD"] = kircControlSD
+  kircttest[i, "T-Test"] = t.test(kircTumor, kircControl)
+  kircttest[i, "pvalue"] = pvalue
+}
+rownames(kircttest) = rownames(kircmatrix)
+kircttest
+
+```
+
+
+
+B.  Find 50 most significantly different miRNA names between tumor and control samples and save their names with means, standard deviations for tumor and control samples and p-values.
+
+```{r}
+order(kircttest$pvalue)
+statTableOrder <- kircttest[order(kircttest$pvalue), ]
+sig_50 <- statTableOrder[1:50, ]
+head(sig_50)
+
+
+```
+
+
+C. Make a heatmap of 50 most signficantly differently expressed miRNAs (row clustering only). Use the colors darkblue,
+white and red2. [USA!USA!USA!].
+
+```{r}
+logKIRC = log2(kircmatrix+1)
+sigKIRC = logKIRC[order(kircttest$pvalue)[1:50] , ]
+
+library(pheatmap)
+
+pheatmap(sigKIRC, scale = "row", cluster_cols = F, border_color = NA, main = "Sig Expressions", cellwidth = 3, cellheight = 3,
+color = colorRampPalette(c("darkblue", "white", "red2"))(256))
+```
+
+## Correlations
+
+A. Find correlations between the most significant miRNA with 29 other miRNAs for 1) all samples.
+```{r}
+
+```
+
+
+B. Among A. can you find some patterns between miRNAs? What are your findings? (example: to find the most correlated miRNA with the most significant miRNA)
+
+
+## Random Forest (Bonus)
+
+A. Create a random forest using the steps from the random forest .html file to classify your data. What is your accuracy?
+
+
+B. Change variables in the random forest run and check if the results are different. What are the parameters that you can achieve a better accuracy?
+
+
+## Analysis
+
+### miRNAs
+
+
+What are your most significant miRNAs? Are they up-regulated or down-regulated? Are they highly correlated with each other?
+
+```{r}
+
+```
+
+
+### Genes
+
+A. What are the common gene targets of your significant miRNAs?
+
+
+B. Are any of your genes targeted by these top miRNAs known mutations of the disease you are researching?
+
+
+## Conclusion
+
+What do your findings suggest to you about potential diagnosis/treatment targets for the disease you are researching?
+
+
+
+## Optional
+
+
+A. Make a heatmap of all data (row clustering only). Use the colors darkblue, white and red2. [USA!USA!USA!].
+
+
+B. find all correlations among the 30 most significant miRNAs for
+1) all samples, 2) all tumor samples, 3) all control samples.

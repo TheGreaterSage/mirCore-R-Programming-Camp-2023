@@ -1,0 +1,131 @@
+---
+title: "ggplot_basic"
+author: "Inhan Lee"
+date: "6/17/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Open your Rstudio and load the blank file.
+
+Today we will use ggplot to make high-quality figures. 
+The graphic philosophy: We define a playing ground (data frame), with an x-axis and a y-axis and then we can add layers over it. 
+
+We do asesthetic mapping of variables in the data to visual properties.
+
+## Install package and setup
+
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+```
+
+
+## Read data
+
+ggplot needs dataframe to read x-values and y-values.
+
+#### We will also prepare a log transformed dataframe of smalldata
+
+
+```{r}
+smalldata = read.table("small_data.txt", header = T, row.names = 1)
+smalldata_log = log2(smalldata+1)
+ 
+```
+
+## ggplot first define the data range (x and y)
+#### x and y: both columns of a dataframe
+
+```{r}
+ggplot(smalldata_log, aes(x = Tumor_1, y= Control_1)) +
+  geom_point(aes(color = Tumor_1))
+ggplot(smalldata_log,aes(x=Tumor_1, y=Control_1)) + geom_point(aes(color=Tumor_1, size=Tumor_1)) + scale_color_gradient(low = "white", high = "black")
+smalldata_log$cutoff=smalldata_log$Tumor_1>10
+ggplot(smalldata_log,aes(x=Tumor_1,y=Control_1))+
+  geom_point(aes(color=cutoff))
+ggplot(smalldata_log,aes(x=Tumor_1,y=Control_1))+
+  geom_point()+
+  geom_point(aes(x=Tumor_2,y=Control_2),color="red")+
+  xlab("Tumor expression")+
+  ylab("Control expression")
+```
+
+## Second add the graph type
+geom_point() is used to create scatterplots
+
+```{r}
+values=c(rnorm(20,mean=10,sd=2),rnorm(20,mean=12,sd=4),rnorm(20,mean=5,sd=1))
+
+group=c(rep("A",20),rep("B",20),rep("C",20))
+
+gg_example=cbind.data.frame(values,group)
+
+ggplot(data = gg_example,aes(x=group, y=values)) +
+  geom_boxplot((aes(color = group)))
+
+ggplot(data = gg_example,aes(x=group, y=values)) +
+  geom_point() +
+  geom_boxplot((aes(fill = group)))
+
+ggplot(data=gg_example,aes(x=group,y=values))+
+  geom_boxplot(aes(fill=group))+
+  geom_point()
+  
+```
+
+
+## We can change color and size of the points
+Let's use red for points with size 3.
+
+```{r}
+
+
+
+```
+
+## Tasks
+
+1. Use log transformed data range (x and y) to define the base layer of x-values and y-values
+
+```{r}
+
+
+```
+
+2. Use scatter plot to define another layer of plot type
+
+```{r}
+
+
+```
+
+
+3. Change the color and size of the points
+
+```{r}
+
+```
+
+
+4. additional layer challenge: add abline to current graph
+```{r}
+
+
+```
+
+
+5. Change the color and thickness of the abline
+
+
+```{r}
+
+```
+
+
+
+
+

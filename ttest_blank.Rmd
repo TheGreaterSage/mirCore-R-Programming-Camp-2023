@@ -1,0 +1,82 @@
+---
+title: "3_1 ttest"
+author: "Prasanna Padmanabham"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## T-test
+First, we need generate data that we can analyze
+```{r}
+par(mfrow=c(1,2))
+set.seed(1)
+vec1 = rnorm(10, mean=10, sd=2)
+boxplot(vec1, ylim = c(0,15))
+
+set.seed(2)
+vec2 = rnorm(10, mean=10, sd=2)
+boxplot(vec2, ylim = c(0,15))
+```
+
+
+Let's visualize the data we just generated
+
+Now, let's run a ttest 
+But before we do, how confident are that these distributions are similar (green check) or not similar (red cross)
+
+```{r}
+
+```
+
+what if we just want the p.value, standard deviation or just the mean?
+```{r}
+t.test(vec1, vec2)$p.value
+mean(vec1)
+mean(vec2)
+sd(vec1)
+sd(vec2)
+```
+
+
+
+Let's try this with small data! Run a t.test on the miR_a values for Tumor samples and Control samples
+* if you forgot how use the functions for the mean (mean()) and standard deviation (sd()), feel free to use google or the help feature on R!
+
+* R is a little quirky in that it can't find the mean of a row from a dataframe. To solve this, change it to a matrix (as.matrix()) or a vector (as.vector())
+
+1. What are mean and standard deviation of miR_a values of Tumor samples?
+```{r}
+smalldataM = as.matrix(smalldata)
+miRaTumor = smalldataM["miR_a", 1:10]
+mean(miRaTumor)
+sd(miRaTumor)
+```
+
+2. What are mean and standard deviation of miR_a values of Control samples?
+```{r}
+miRaControl = smalldataM["miR_a", 11:20]
+mean(miRaControl)
+sd(miRaControl)
+```
+
+3. What is the p-value of student t-test between miR_a values of Tumor samples and miR_a values of Control samples?
+```{r}
+t.test(miRaTumor, miRaControl)
+```
+
+
+4. Are the miR_a values of Tumor samples different from the miR_a values of Control samples? How confident are you?
+
+Very confident that they are different
+
+5. What is the log2 value of mean(miR_a of Tumor)/mean(miR_a of Control)?
+```{r}
+log2(mean(miRaTumor)/mean(miRaControl))
+```
+
+6. Is miR_a upregulated or downregulated in Tumor compared to Control? 
+
+downregulated

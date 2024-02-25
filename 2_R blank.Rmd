@@ -1,0 +1,189 @@
+---
+title: "2R"
+author: "Prasanna Padmanabham"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The learning objectives for this lecture is to:
+1) learn how to read files correctly
+2) Review Indexing, Which() and grep()
+3) Create new columns, and column operations
+
+### Reading Files
+Our goal is to load the small_data.txt file into Rstudio so we can analyze the data and create really cool visuals
+
+Small data has 20 rows and 20 columns
+
+The function we will be using is the read.table()
+```{r}
+smalldata= read.table("small_data.txt")
+```
+
+Let's check to see if our data was loaded correctly: 
+```{r}
+dim(smalldata)
+head(smalldata)
+str(smalldata)
+```
+
+Did it work? 
+
+
+Let's try again: 
+```{r}
+smalldata = read.table("small_data.txt", header=T, stringsAsFactors = F)
+dim(smalldata)
+head(smalldata)
+str(smalldata)
+```
+
+Did it work? 
+
+3rd time's the charm: 
+```{r}
+smalldata = read.table("small_data.txt", header=T, stringsAsFactors = F, row.names = 1)
+dim(smalldata)
+head(smalldata)
+str(smalldata)
+colnames(smalldata)
+row.names(smalldata)
+```
+
+#### Breakout Session
+1) Make sure you read small_data.txt correctly
+2) Update your R markdown files and your cheat sheet
+3) What do you think the functions colnames(smalldata) and row.names(smalldata) do? 
+4) Make a group Zoom background
+
+
+### Indexing and Subseting
+
+Let's review how to index dataframes (and vectors) using our first data table, smalldata!
+
+How can we find the value associated with the 20 row and 15 column? 
+```{r}
+smalldata[20,15]
+smalldata[1:5, 1:10]#Let's find the first 5 rows and the first 10 columns
+smalldata[1:5,]#returns the first 5 rows and all columns
+smalldata["mir_a",]#returns all values in the "miR_a" row
+smalldata[,"Tumor_1"]#returns all values in Tumor_1 column
+
+#If you want to subset multiple rows you can even do
+smalldata[c("miR_a, miR_e"), c(1,5,20.15)]
+#or even
+```
+
+But what if we don't know what specific row we are interested in  or the specific index numbers associated with ALL tumors and ALL controls? 
+
+### Grep
+type ?grep() into your console, what do you think it does?
+grep(pattern, x)
+
+pattern: "character string...to be matched in the given character vector"
+x: "a character vector where matches are sought"
+
+Let's find the column id's associated with all controls in smalldata
+```{r}
+colnames(smalldata)
+grep("Control", colnames(smalldata))
+smalldata[,grep("Control", colnames(smalldata))]
+```
+Let's select row names with specific words such as "miR_b"
+```{r}
+row.names(smalldata)
+grep("miR_b", row.names(smalldata))
+smalldata[grep("miR_b", row.names(smalldata)),]
+```
+
+Did this actually work? 
+```{r}
+head(smalldata)
+```
+
+Yes! miR_b is the second row and all the control data is located in columns 11-20!
+
+What if we want to subset rows or columns that contain specific values?
+Let's find all the miR_a values over 20,000
+```{r}
+which(smalldata["miR_a",] >= 20000)
+head(smalldata)
+```
+
+All in all, grep and which can be used to find specific patterns in dataframes or vectors
+(switch to powerpoint here)
+
+#### Breakout Room task: 
+Update your Rmd/cheatsheet on grep
+
+Get column ids for “Tumor” samples
+Select all values for Tumor samples from smalldata
+```{r}
+colnames(smalldata)
+grep("Tumor", colnames(smalldata))
+smalldata[,grep("Tumor", colnames(smalldata))]
+
+```
+
+
+Perfect your group zoom background
+
+### Creating a new table from small_data.txt
+We want a new table with just Tumor_1 and Control_1 values
+```{r}
+Tumor1 = smalldata[, "Tumor_1"]
+Control1 = smalldata[, "Control_1"]
+Tum1_Con1 = cbind.data.frame(Tumor1, Control1)
+```
+
+Does our new dataframe look the way we want it to look?
+```{r}
+row.names(Tum1_Con1) = row.names(smalldata)
+head(Tum1_Con1)
+```
+```{r}
+
+```
+
+
+
+Now let's make a new col with the difference in expression between all the miRs for Tumor1 and Control1
+```{r}
+Tum1_Con1$Difference = Tum1_Con1[,1]- Tum1_Con1[,2]
+```
+
+Let's save our table now!
+```{r}
+write.table(Tum1_Con1, file = "Sample1_Data.txt", sep = "\t", col.names=NA)
+dir()
+```
+
+
+#### Breakout Room Tasks: 
+1) Catch up, you should have the correct Tum1_Con1 and smalldata frames
+2) Write commands to achieve the following: 
+  a) Assign new row.names to Tum1_Con1 using the miRNA names from smalldata
+```{r}
+row.names(Tum1_Con1) = row.names(smalldata)
+```
+  
+  
+  b) Calculate value of Tumor1/Control1 for each miRNA and assign all calculated values to a
+  new column called Ratio in the Tum1_Con1 dataframe
+```{r}
+Tum1_Con1$Ratio = Tum1_Con1[,1]/Tum1_Con1[,2]
+head(Tum1_Con1)
+```
+  
+  
+  c) Find the names of miRNA's whose Tumor1/Control1 values are less than 1 (aka down
+  regulated miRNAs in Tumor1)
+```{r}
+row.names(Tum1_Con1[which(Tum1_Con1[,"Ratio"] < 1),])
+head(Tum1_Con1)
+```
+  
+
